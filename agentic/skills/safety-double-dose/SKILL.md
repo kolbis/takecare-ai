@@ -1,0 +1,21 @@
+---
+name: safety-double-dose
+description: Evaluate whether marking the current dose as taken would be a double-dose risk. Use check_double_dose and get_medication_event. Return only SAFE or RISK and a short reason. No user-facing message text.
+allowed-tools: check_double_dose, get_medication_event
+---
+
+# safety-double-dose
+
+## Overview
+
+This skill is used by the Safety Officer subagent to evaluate double-dose risk before the user's "taken" confirmation is recorded.
+
+## Instructions
+
+1. Use get_medication_event with the user_id (and optional reminder/event context) to obtain the current medication_id and slot_time.
+
+2. Call check_double_dose with user_id, medication_id, slot_time, and within_hours (e.g. 24.0).
+
+3. Return a structured result: **SAFE** or **RISK**, and if RISK include the reason string from the tool. Do not generate any user-facing message text. The main agent or Nurse will handle user messaging.
+
+4. Output only the evaluation result so the orchestrator can decide whether to mark the dose as taken or to escalate.
