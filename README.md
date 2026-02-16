@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TakeCare — AI-Powered Medication Assistant (WhatsApp)
 
 Help older adults take medications correctly and safely via WhatsApp.
@@ -26,3 +27,7 @@ Run from a specific package:
 ```bash
 uv run --project agentic python -c "from agentic.graph.graph import graph; print(graph)"
 ```
+=======
+# takecare-ai
+AI-powered medication adherence assistant for elderly users, built on LangGraph and DeepAgents with safety-first orchestration.
+>>>>>>> e173ba69cb7cfdf6e1ff0ec03aecfd910005286a
