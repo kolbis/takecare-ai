@@ -1,1 +1,3 @@
-# Application logic (DDD): use cases, domain, repositories
+from app.src.app import get_container
+
+__all__ = ["get_container"]

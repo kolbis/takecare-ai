@@ -70,7 +70,7 @@ def test_flow_e_double_dose_risk(graph):
 
 
 def test_flow_scheduled_reminder(graph):
-    """Scheduled reminder: generate_reminder_message."""
+    """Scheduled reminder: send_reminder node."""
     r = graph.invoke(
         {
             "raw_input": {"from_phone": "+1234567890"},

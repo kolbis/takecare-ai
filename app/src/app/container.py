@@ -1,6 +1,3 @@
-"""Simple container: wires mock repositories and use cases."""
-from datetime import date
-
 from app.repositories import (
     MockUserRepository,
     MockScheduleRepository,

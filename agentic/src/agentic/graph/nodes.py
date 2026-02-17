@@ -1,43 +1,15 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any
 
 from agentic.tools import (
     get_user_profile,
     get_medication_event,
-    check_double_dose,
-    mark_dose_taken,
-    snooze_dose,
-    notify_caregiver,
     send_whatsapp_message,
-    check_symptom_severity,
-)
-from agentic.fallback_skills import (
-    handle_taken_intent,
-    handle_snooze_intent,
-    handle_not_sure_intent,
-    handle_symptom_report,
-    escalate_case,
-    generate_reminder_message,
 )
 
 if TYPE_CHECKING:
     from agentic.graph.state import TakeCareState
-
-logger = logging.getLogger(__name__)
-
-# Tools dict for legacy skills (fallback when deep agent not used)
-TOOLS = {
-    "get_user_profile": get_user_profile,
-    "get_medication_event": get_medication_event,
-    "check_double_dose": check_double_dose,
-    "mark_dose_taken": mark_dose_taken,
-    "snooze_dose": snooze_dose,
-    "notify_caregiver": notify_caregiver,
-    "send_whatsapp_message": send_whatsapp_message,
-    "check_symptom_severity": check_symptom_severity,
-}
 
 
 def load_context(state: TakeCareState) -> dict[str, Any]:
@@ -45,8 +17,11 @@ def load_context(state: TakeCareState) -> dict[str, Any]:
     raw = state.get("raw_input") or {}
     # Assume raw has from (phone), message text, optional context (reminder id)
     from_phone = raw.get("from_phone") or raw.get("from") or "+1234567890"
+    thread_id = raw.get("thread_id") or from_phone
     message_text = raw.get("message_text") or raw.get("text") or ""
-    input_type = state.get("input_type") or "incoming_message"
+    
+    # TODO: remove this once we have a proper input type
+    # input_type = state.get("input_type") or "incoming_message"
 
     # Load user
     result = get_user_profile.invoke({"phone": from_phone})
@@ -77,7 +52,7 @@ def load_context(state: TakeCareState) -> dict[str, Any]:
     return {
         "user_id": user_id,
         "user_phone": from_phone,
-        "thread_id": from_phone,
+        "thread_id": thread_id,
         "language": language,
         "current_reminder": current_reminder or {},
         "last_message_text": message_text,
@@ -88,66 +63,36 @@ def deep_agent_node(state: TakeCareState) -> dict[str, Any]:
     """Invoke the DeepAgents orchestrator (Nurse, Safety Officer, Caregiver subagents + skills). Returns state updates."""
     from agentic.agents.deep_agent import invoke_agent
     thread_id = state.get("thread_id") or state.get("user_phone") or "default"
-    try:
-        return invoke_agent(dict(state), thread_id)
-    except Exception as e:
-        logger.exception("Deep agent invoke failed: %s", e)
-        # Fallback: use legacy apply_action path with rule-based intent
-        return _fallback_apply_action(state)
-
-
-def _fallback_apply_action(state: TakeCareState) -> dict[str, Any]:
-    """Fallback when deep agent fails: rule-based intent + legacy skills."""
-    from shared.i18n import get_message
-    last = (state.get("last_message_text") or "").strip().lower()
-    raw = state.get("raw_input") or {}
-    button_id = raw.get("button_id") or raw.get("interactive", {}).get("button_reply", {}).get("id")
-    if button_id == "taken":
-        proposed = "MARK_TAKEN"
-        intent = "taken"
-    elif button_id == "snooze":
-        proposed = "SNOOZE"
-        intent = "snooze"
-    elif button_id == "not_sure":
-        proposed = "CLARIFY"
-        intent = "not_sure"
-    elif "symptom" in last or "hurt" in last or "pain" in last:
-        proposed = "ESCALATE"
-        intent = "symptom"
-    else:
-        proposed = "CLARIFY"
-        intent = "other"
-    state_dict = dict(state)
-    state_dict["proposed_action"] = proposed
-    state_dict["intent"] = intent
-    if proposed == "MARK_TAKEN":
-        cur = state.get("current_reminder") or {}
-        result = check_double_dose.invoke({
-            "user_id": state["user_id"],
-            "medication_id": cur.get("medication_id"),
-            "slot_time": cur.get("slot_time", "08:00"),
-        })
-        if result.get("status") == "RISK":
-            escalate_case(state_dict, TOOLS, reason=result.get("reason", "double_dose"), summary="")
-            return {"response_text": get_message("double_dose_message", state.get("language") or "en"), "escalate_to_caregiver": True}
-        return handle_taken_intent(state_dict, TOOLS)
-    if proposed == "SNOOZE":
-        return handle_snooze_intent(state_dict, TOOLS)
-    if proposed == "CLARIFY" and intent == "not_sure":
-        return handle_not_sure_intent(state_dict, TOOLS)
-    if intent == "symptom":
-        return handle_symptom_report(state_dict, TOOLS)
-    return handle_not_sure_intent(state_dict, TOOLS)
+    return invoke_agent(dict(state), thread_id)
 
 
 def send_reminder(state: TakeCareState) -> dict[str, Any]:
     """For scheduled_reminder: generate and send reminder message (no user message)."""
-    return generate_reminder_message(dict(state), TOOLS)
+    from shared.src.shared.i18n import get_message, get_reminder_buttons
+    user_id = state.get("user_id")
+    user_phone = state.get("user_phone") or ""
+    language = state.get("language") or "en"
+    event_result = get_medication_event.invoke({"user_id": user_id})
+    if not event_result.get("found"):
+        response_text = get_message("reminder_body", language, medication_name="your medication")
+    else:
+        medication_name = event_result.get("medication_name", "your medication")
+        response_text = get_message("reminder_body", language, medication_name=medication_name)
+    buttons = get_reminder_buttons(language)
+    send_whatsapp_message.invoke({
+        "to_phone": user_phone,
+        "text": response_text,
+        "buttons": buttons,
+    })
+    return {
+        "response_text": response_text,
+        "response_buttons": buttons,
+    }
 
 
 def finalize(state: TakeCareState) -> dict[str, Any]:
     """Ensure response_text/response_buttons are set for API to send. Notify caregiver if needed."""
-    # Already sent by skills via send_whatsapp_message; just pass through
+    # TODO: need to design more structured output for the API to send.
     return {
         "response_text": state.get("response_text") or "Done.",
         "response_buttons": state.get("response_buttons"),
