@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import List, Optional
 
-from app.domain.entities import MedicationEvent
+from app.domain.events import MedicationEvent
 from app.repositories.medication_event_repository import MedicationEventRepository
 
 

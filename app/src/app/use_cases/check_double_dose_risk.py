@@ -1,7 +1,7 @@
 """Check if marking dose as taken would be double-dose risk."""
 from dataclasses import dataclass
 
-from app.domain.value_objects import DoubleDoseStatus
+from app.domain.types import DoubleDoseStatus
 from app.repositories.dose_event_repository import DoseEventRepository
 
 

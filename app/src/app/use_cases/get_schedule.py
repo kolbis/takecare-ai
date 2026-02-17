@@ -3,13 +3,13 @@ from dataclasses import dataclass
 from datetime import date
 from typing import List
 
-from app.domain.entities import UserMedication
+from app.domain.entities import UserMedicationEntity
 from app.repositories.schedule_repository import ScheduleRepository
 
 
 @dataclass
 class GetScheduleForUserResult:
-    medications: List[UserMedication]
+    medications: List[UserMedicationEntity]
 
 
 class GetScheduleForUser:

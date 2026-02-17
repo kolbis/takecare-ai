@@ -2,8 +2,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.domain.entities import DoseEvent
-from app.domain.value_objects import DoseEventSource
+from app.domain.events import DoseEvent, DoseEventSource
 from app.repositories.dose_event_repository import DoseEventRepository
 from app.repositories.medication_event_repository import MedicationEventRepository
 

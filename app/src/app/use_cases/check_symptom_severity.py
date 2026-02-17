@@ -1,7 +1,7 @@
 """Check symptom severity. Mock: always returns medium (escalate)."""
 from dataclasses import dataclass
 
-from app.domain.value_objects import SymptomSeverity
+from app.domain.types import SymptomSeverity
 
 
 @dataclass

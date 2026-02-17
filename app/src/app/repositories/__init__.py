@@ -1,6 +1,10 @@
 # Repository interfaces and implementations
 from app.repositories.user_repository import UserRepository, MockUserRepository
 from app.repositories.schedule_repository import ScheduleRepository, MockScheduleRepository
+from app.repositories.medication_repository import (
+    MedicationRepository,
+    MockMedicationRepository,
+)
 from app.repositories.medication_event_repository import (
     MedicationEventRepository,
     MockMedicationEventRepository,
@@ -13,6 +17,8 @@ __all__ = [
     "MockUserRepository",
     "ScheduleRepository",
     "MockScheduleRepository",
+    "MedicationRepository",
+    "MockMedicationRepository",
     "MedicationEventRepository",
     "MockMedicationEventRepository",
     "DoseEventRepository",

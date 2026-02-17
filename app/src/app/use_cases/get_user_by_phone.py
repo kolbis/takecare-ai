@@ -2,13 +2,13 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from app.domain.entities import User
+from app.domain.entities import UserEntity
 from app.repositories.user_repository import UserRepository
 
 
 @dataclass
 class GetUserByPhoneResult:
-    user: Optional[User]
+    user: Optional[UserEntity]
 
 
 class GetUserByPhone:

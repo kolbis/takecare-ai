@@ -17,19 +17,6 @@ class MedicationEntity:
     how_to_store: List[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if not self.id.strip():
-            raise ValueError("Medication id cannot be empty.")
-
-        if not self.name.strip():
-            raise ValueError("Medication name cannot be empty.")
-
-        if not self.description.strip():
-            raise ValueError("Medication description cannot be empty.")
-
-        # Normalize text fields
-        self.name = self.name.strip()
-        self.description = self.description.strip()
-
         # Clean list fields (remove empty entries & strip)
         self.warnings = self._clean_list(self.warnings)
         self.side_effects = self._clean_list(self.side_effects)

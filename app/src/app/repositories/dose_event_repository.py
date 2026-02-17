@@ -1,15 +1,13 @@
-"""Dose event repository interface and mock."""
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
 from typing import List
 
-from app.domain.entities import DoseEvent
+from app.domain.events import DoseEvent
+from shared.src.shared import dt
 
 
 class DoseEventRepository(ABC):
     @abstractmethod
-    def add(self, event: DoseEvent) -> None:
-        ...
+    def add(self, event: DoseEvent) -> None: ...
 
     @abstractmethod
     def get_recent_doses(
@@ -39,7 +37,7 @@ class MockDoseEventRepository(DoseEventRepository):
         slot_time: str,
         within_hours: float = 24.0,
     ) -> List[DoseEvent]:
-        cutoff = datetime.utcnow() - timedelta(hours=within_hours)
+        cutoff = dt.utc_cutoff(hours=within_hours)
         return [
             e
             for e in self._events

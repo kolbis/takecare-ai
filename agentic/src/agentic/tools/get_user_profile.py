@@ -10,15 +10,17 @@ def get_user_profile(phone: str) -> dict:
     if not result.user:
         return {"found": False, "user_id": None}
     u = result.user
+    age = u.date_of_birth.age().value if u.date_of_birth else None
+    name = f"{u.first_name} {u.last_name}".strip() or None
     return {
         "found": True,
-        "user_id": u.id,
-        "phone": u.phone,
-        "language": u.language,
-        "caregiver_ids": u.caregiver_ids,
-        "timezone": u.timezone,
-        "first_name": u.first_name,
-        "last_name": u.last_name,
-        "age": u.age,
-        "name": u.name,
+        "user_id": str(u.id),
+        "phone": str(u.phone),
+        "language": u.language.code,
+        "caregiver_ids": [str(c) for c in u.caregiver_ids],
+        "timezone": str(u.timezone),
+        "first_name": str(u.first_name),
+        "last_name": str(u.last_name),
+        "age": age,
+        "name": name,
     }

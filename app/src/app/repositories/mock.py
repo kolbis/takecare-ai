@@ -1,0 +1,11 @@
+# Fixed UUIDs for mock user.
+MOCK_USER_ID = "00000000-0000-0000-0000-000000000001"
+
+# Fixed UUIDs for mock user medication.
+MOCK_USER_MEDICATION_ID = "00000000-0000-0000-0000-000000000010"
+
+# Match medication_id used in MockScheduleRepository.
+MOCK_MEDICATION_ID = "00000000-0000-0000-0000-000000000011"
+
+# Fixed UUIDs for mock caregiver.
+MOCK_CAREGIVER_ID = "00000000-0000-0000-0000-000000000002"
