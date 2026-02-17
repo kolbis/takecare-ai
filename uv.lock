@@ -12,7 +12,7 @@ members = [
     "api",
     "app",
     "shared",
-    "takecare",
+    "takecare-ai",
 ]
 
 [[package]]
@@ -2110,7 +2110,7 @@ wheels = [
 ]
 
 [[package]]
-name = "takecare"
+name = "takecare-ai"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

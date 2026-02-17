@@ -1,3 +1,3 @@
-from app.src.app import get_container
+from app.container import get_container
 
 __all__ = ["get_container"]

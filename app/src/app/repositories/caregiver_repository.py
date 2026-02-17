@@ -1,26 +1,27 @@
-"""Caregiver link repository interface and mock."""
+"""Caregiver repository interface and mock."""
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import List
 
-from app.domain.entities import CaregiverLink
+from app.domain.entities import Caregiver
 
 
 class CaregiverRepository(ABC):
     @abstractmethod
-    def get_by_user_id(self, user_id: str) -> Optional[CaregiverLink]:
+    def get_caregivers_for_user(self, user_id: str) -> List[Caregiver]:
         ...
 
 
 class MockCaregiverRepository(CaregiverRepository):
-    """Mock: returns a fixed caregiver link."""
+    """Mock: returns a fixed list of caregivers for user."""
 
     def __init__(self):
-        self._link = CaregiverLink(
-            user_id="u1",
-            caregiver_id="c1",
-            contact_phone="+0987654321",
-            contact_email="caregiver@example.com",
-        )
+        self._caregivers = [
+            Caregiver(
+                id="c1",
+                contact_phone="+0987654321",
+                contact_email="caregiver@example.com",
+            )
+        ]
 
-    def get_by_user_id(self, user_id: str) -> Optional[CaregiverLink]:
-        return self._link
+    def get_caregivers_for_user(self, user_id: str) -> List[Caregiver]:
+        return self._caregivers

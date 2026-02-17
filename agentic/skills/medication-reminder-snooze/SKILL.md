@@ -11,7 +11,7 @@ This skill handles the flow when the user wants to snooze the current reminder.
 
 ## Instructions
 
-1. Delegate to the Nurse subagent to snooze the current reminder (use snooze_dose with the reminder_id from context and a sensible snooze_minutes, e.g. 15).
+1. Delegate to the Nurse subagent to snooze the current reminder. From current_reminder.medications, collect each medication's reminder_id and pass them as reminder_ids to snooze_dose (one id = snooze one event; all ids = snooze the whole slot). Use a sensible snooze_minutes (e.g. 15).
 
 2. The Nurse should send the snooze confirmation message in the user's language (EN or HE) via send_whatsapp_message.
 

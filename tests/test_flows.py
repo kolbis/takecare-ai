@@ -70,7 +70,7 @@ def test_flow_e_double_dose_risk(graph):
 
 
 def test_flow_scheduled_reminder(graph):
-    """Scheduled reminder: send_reminder node."""
+    """Scheduled reminder: send_reminder node; mock returns multiple meds per slot."""
     r = graph.invoke(
         {
             "raw_input": {"from_phone": "+1234567890"},
@@ -78,16 +78,29 @@ def test_flow_scheduled_reminder(graph):
         },
         config={"configurable": {"thread_id": "sched"}},
     )
-    assert "Aspirin" in r.get("response_text", "") or "medication" in r.get("response_text", "").lower()
+    text = r.get("response_text", "")
+    # Multi-medication message includes count and list
+    assert "medications to take" in text or "medication" in text.lower()
+    assert "Aspirin" in text
+    assert "3" in text or "Ibuprofen" in text  # count or another name from mock slot
     assert r.get("response_buttons")
 
 
 def test_i18n_he(graph):
     """Hebrew: user prefers HE -> reminder in Hebrew."""
-    from app.container import get_container
-    # Mock user with language=he: we'd need to override mock or pass language in state
-    # For now just check shared i18n
     from shared.i18n import get_message, get_reminder_buttons
     assert "נטלתי" in get_message("reminder_buttons_taken", "he")
     buttons = get_reminder_buttons("he")
     assert any(b["id"] == "taken" for b in buttons)
+
+
+def test_i18n_reminder_body_multi():
+    """Multi-medication reminder message includes count and list (EN and HE)."""
+    from shared.i18n import get_message
+    en = get_message("reminder_body_multi", "en", count=3, medication_list="Aspirin, Ibuprofen, and Vitamin D")
+    assert "3" in en
+    assert "medications to take" in en
+    assert "Aspirin" in en and "Vitamin D" in en
+    he = get_message("reminder_body_multi", "he", count=2, medication_list="X and Y")
+    assert "2" in he
+    assert "תרופות" in he or "X" in he

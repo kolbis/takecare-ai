@@ -119,7 +119,16 @@ def _state_to_user_message(state: dict[str, Any]) -> str:
     ]
     current_reminder = state.get("current_reminder") or {}
     if current_reminder:
-        parts.append("Current reminder: " + str(current_reminder))
+        slot_time = current_reminder.get("slot_time", "")
+        medications = current_reminder.get("medications") or []
+        if medications:
+            parts.append(
+                "Current reminder: slot_time=" + str(slot_time)
+                + ", medications=" + str(medications)
+                + " (each has medication_id, medication_name, dose_index, reminder_id)."
+            )
+        else:
+            parts.append("Current reminder: " + str(current_reminder))
     return "\n".join(parts)
 
 

@@ -6,6 +6,7 @@ Language = Literal["en", "he"]
 # Keys used by agentic/skills and api
 MESSAGE_KEYS = [
     "reminder_body",
+    "reminder_body_multi",
     "reminder_buttons_taken",
     "reminder_buttons_snooze",
     "reminder_buttons_not_sure",
@@ -20,6 +21,10 @@ _MESSAGES: Dict[str, Dict[str, str]] = {
     "reminder_body": {
         "en": "Time for your {medication_name}. Did you take it?",
         "he": "זמן ל-{medication_name}. נטלת?",
+    },
+    "reminder_body_multi": {
+        "en": "You have {count} medications to take: {medication_list}. Did you take them?",
+        "he": "יש לך {count} תרופות לקחת: {medication_list}. נטלת?",
     },
     "reminder_buttons_taken": {
         "en": "Taken ✅",

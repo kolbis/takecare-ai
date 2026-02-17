@@ -3,23 +3,24 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import List
 
-from app.domain.entities import Medication
+from app.domain.entities import UserMedication
 
 
 class ScheduleRepository(ABC):
     @abstractmethod
-    def get_schedule(self, user_id: str, for_date: date) -> List[Medication]:
+    def get_schedule(self, user_id: str, for_date: date) -> List[UserMedication]:
         ...
 
 
 class MockScheduleRepository(ScheduleRepository):
-    """Mock: returns one medication with two slots for today."""
+    """Mock: returns one assigned medication with two slots for today."""
 
-    def get_schedule(self, user_id: str, for_date: date) -> List[Medication]:
+    def get_schedule(self, user_id: str, for_date: date) -> List[UserMedication]:
         return [
-            Medication(
+            UserMedication(
                 id="med1",
                 user_id=user_id,
+                medication_id="med1",
                 name="Aspirin",
                 slots=["08:00", "20:00"],
             )

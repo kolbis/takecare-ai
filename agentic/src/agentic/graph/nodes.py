@@ -36,17 +36,24 @@ def load_context(state: TakeCareState) -> dict[str, Any]:
     user_id = result["user_id"]
     language = result.get("language") or "en"
 
-    # Load current reminder if reply-to-reminder or scheduled_reminder
-    current_reminder = state.get("current_reminder")
+    # Load current reminder (can be multiple meds per slot). For scheduled_reminder always fetch slot events.
+    current_reminder = state.get("current_reminder") if state.get("input_type") != "scheduled_reminder" else None
     if not current_reminder and user_id:
         event_result = get_medication_event.invoke({"user_id": user_id})
-        if event_result.get("found"):
+        if event_result.get("found") and event_result.get("events"):
+            events_list = event_result["events"]
+            slot_time = events_list[0].get("slot_time", "08:00") if events_list else "08:00"
             current_reminder = {
-                "reminder_id": event_result["reminder_id"],
-                "medication_id": event_result["medication_id"],
-                "medication_name": event_result["medication_name"],
-                "slot_time": event_result["slot_time"],
-                "dose_index": event_result.get("dose_index", 0),
+                "slot_time": slot_time,
+                "medications": [
+                    {
+                        "medication_id": e["medication_id"],
+                        "medication_name": e["medication_name"],
+                        "dose_index": e.get("dose_index", 0),
+                        "reminder_id": e["reminder_id"],
+                    }
+                    for e in events_list
+                ],
             }
 
     return {
@@ -66,9 +73,18 @@ def deep_agent_node(state: TakeCareState) -> dict[str, Any]:
     return invoke_agent(dict(state), thread_id)
 
 
+def _format_medication_list(names: list[str]) -> str:
+    """Format as 'A, B, and C'."""
+    if not names:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    return ", ".join(names[:-1]) + " and " + names[-1]
+
+
 def send_reminder(state: TakeCareState) -> dict[str, Any]:
-    """For scheduled_reminder: generate and send reminder message (no user message)."""
-    from shared.src.shared.i18n import get_message, get_reminder_buttons
+    """For scheduled_reminder: generate and send reminder message (no user message). Supports single or multiple medications."""
+    from shared.i18n import get_message, get_reminder_buttons
     user_id = state.get("user_id")
     user_phone = state.get("user_phone") or ""
     language = state.get("language") or "en"
@@ -76,8 +92,16 @@ def send_reminder(state: TakeCareState) -> dict[str, Any]:
     if not event_result.get("found"):
         response_text = get_message("reminder_body", language, medication_name="your medication")
     else:
-        medication_name = event_result.get("medication_name", "your medication")
-        response_text = get_message("reminder_body", language, medication_name=medication_name)
+        events_list = event_result.get("events") or []
+        names = [e.get("medication_name") or "your medication" for e in events_list]
+        if len(names) <= 1:
+            medication_name = names[0] if names else "your medication"
+            response_text = get_message("reminder_body", language, medication_name=medication_name)
+        else:
+            medication_list = _format_medication_list(names)
+            response_text = get_message(
+                "reminder_body_multi", language, count=len(names), medication_list=medication_list
+            )
     buttons = get_reminder_buttons(language)
     send_whatsapp_message.invoke({
         "to_phone": user_phone,

@@ -12,9 +12,9 @@ This skill is used by the Safety Officer subagent to evaluate double-dose risk b
 
 ## Instructions
 
-1. Use get_medication_event with the user_id (and optional reminder/event context) to obtain the current medication_id and slot_time.
+1. Use get_medication_event with the user_id (and optional reminder/event context) to obtain the current slot events. The result includes an **events** list; each event has medication_id, slot_time, dose_index. When the reminder has multiple medications, this skill may be invoked **once per medication** by the orchestrator.
 
-2. Call check_double_dose with user_id, medication_id, slot_time, and within_hours (e.g. 24.0).
+2. For the medication you are evaluating, call check_double_dose with user_id, medication_id, slot_time, and within_hours (e.g. 24.0).
 
 3. Return a structured result: **SAFE** or **RISK**, and if RISK include the reason string from the tool. Do not generate any user-facing message text. The main agent or Nurse will handle user messaging.
 

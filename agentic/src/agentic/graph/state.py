@@ -12,7 +12,7 @@ class TakeCareState(MessagesState, total=False):
     language: Literal["en", "he"]
     messages: Annotated[list, add_messages]
     current_reminder: (
-        dict  # medication_id, medication_name, slot_time, dose_index, reminder_id
+        dict  # slot_time: str, medications: list[{medication_id, medication_name, dose_index, reminder_id}]
     )
     intent: str  # taken, snooze, not_sure, no_medication, symptom, other
     safety_flags: dict

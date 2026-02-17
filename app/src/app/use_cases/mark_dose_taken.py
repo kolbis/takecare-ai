@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 from app.domain.entities import DoseEvent
+from app.domain.value_objects import DoseEventSource
 from app.repositories.dose_event_repository import DoseEventRepository
 from app.repositories.medication_event_repository import MedicationEventRepository
 
@@ -13,7 +14,7 @@ class MarkDoseTakenInput:
     medication_id: str
     slot_time: str
     dose_index: int
-    source: str = "user_confirmed"
+    source: DoseEventSource = "user_confirmed"
 
 
 @dataclass

@@ -23,8 +23,11 @@ class MockUserRepository(UserRepository):
             id="u1",
             phone="+1234567890",
             language="en",
-            caregiver_id="c1",
             timezone="UTC",
+            caregiver_ids=["c1"],
+            first_name="Test",
+            last_name="User",
+            age=None,
             name="Test User",
         )
 

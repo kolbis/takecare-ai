@@ -11,9 +11,11 @@ This skill is used when the system needs to send a scheduled medication reminder
 
 ## Instructions
 
-1. Delegate to the Nurse subagent to get the current medication event for the user (use get_medication_event with user_id).
+1. Delegate to the Nurse subagent to get the current medication events for the user (use get_medication_event with user_id). The tool returns an **events** list; there may be one or multiple medications for the same slot.
 
-2. Using the medication name and slot from the event, format the reminder message in the user's preferred language (EN or HE). Example EN: "Time for your [medication_name]. Did you take it?" Example HE: "זמן ל-[medication_name]. נטלת?"
+2. Format the reminder message in the user's preferred language (EN or HE):
+   - **Single medication**: "Time for your [medication_name]. Did you take it?" (EN) / "זמן ל-[medication_name]. נטלת?" (HE).
+   - **Multiple medications**: Use the count and list: "You have N medications to take: [medication_list]. Did you take them?" (e.g. "You have 3 medications to take: Aspirin, Ibuprofen, and Vitamin D. Did you take them?"). Build medication_list as "X, Y, and Z" (comma-separated with " and " before the last item).
 
 3. Attach quick-reply buttons in the user's language: Taken (נטלתי), Remind later (תזכיר אחר כך), Not sure (לא בטוח).
 
